@@ -68,10 +68,16 @@ size_t BlockArray::append(Block *block)
     if (current >= size) current = 0;
 
     int rc;
-    rc = lseek(ion, current * blocksize, SEEK_SET); if (rc < 0) { perror("HistoryBuffer::add.seek"); setHistorySize(0); return size_t(-1); }
-    rc = write(ion, block, blocksize); if (rc < 0) { perror("HistoryBuffer::add.write"); setHistorySize(0); return size_t(-1); }
 
-    length++;
+    rc = lseek(ion, current * blocksize, SEEK_SET);
+    if (rc < 0) { perror("HistoryBuffer::add.seek");
+    setHistorySize(0); return size_t(-1); }
+
+    rc = write(ion, block, blocksize);
+    if (rc < 0) { perror("HistoryBuffer::add.write");
+    setHistorySize(0); return size_t(-1); }
+
+    ++length;
     if (length > size) length = size;
 
     ++index;
@@ -97,14 +103,7 @@ Block *BlockArray::lastBlock() const
 
 bool BlockArray::has(size_t i) const
 {
-    if (i == index + 1)
-        return true;
-
-    if (i > index)
-        return false;
-    if (index - i >= length)
-        return false;
-    return true;
+    return ((i == index + 1) || (i <= index && index - i < length));
 }
 
 const Block* BlockArray::at(size_t i)
@@ -119,7 +118,7 @@ const Block* BlockArray::at(size_t i)
         qDebug() << "BlockArray::at() i > index\n";
         return 0;
     }
-    
+
 //     if (index - i >= length) {
 //         kDebug(1211) << "BlockArray::at() index - i >= length\n";
 //         return 0;
@@ -253,7 +252,7 @@ void BlockArray::decreaseBuffer(size_t newsize)
     }
 
     size_t oldpos;
-    for (size_t i = 0, cursor=firstblock; i < newsize; i++) {
+    for (size_t i = 0, cursor=firstblock; i < newsize; ++i) {
         oldpos = (size + cursor + offset) % size;
         moveBlock(fion, oldpos, cursor, buffer1);
         if (oldpos < newsize) {
@@ -295,13 +294,13 @@ void BlockArray::increaseBuffer()
     FILE *fion = fdopen(dup(ion), "w+b");
     if (!fion) {
         perror("fdopen/dup");
-	delete [] buffer1;
-	delete [] buffer2;
+  delete [] buffer1;
+  delete [] buffer2;
         return;
     }
 
     int res;
-    for (int i = 0; i < runs; i++)
+    for (int i = 0; i < runs; ++i)
     {
         // free one block in chain
         int firstblock = (offset + i) % size;

@@ -86,10 +86,10 @@ FIXME: There is noticeable decrease in speed, also. Perhaps,
 HistoryFile::HistoryFile()
   : ion(-1),
     length(0),
-	fileMap(0)
+  fileMap(0)
 {
   if (tmpFile.open())
-  { 
+  {
     tmpFile.setAutoRemove(true);
     ion = tmpFile.handle();
   }
@@ -97,8 +97,8 @@ HistoryFile::HistoryFile()
 
 HistoryFile::~HistoryFile()
 {
-	if (fileMap)
-		unmap();
+  if (fileMap)
+    unmap();
 }
 
 //TODO:  Mapping the entire file in will cause problems if the history file becomes exceedingly large,
@@ -106,14 +106,14 @@ HistoryFile::~HistoryFile()
 //to avoid this.
 void HistoryFile::map()
 {
-	assert( fileMap == 0 );
+  assert( fileMap == 0 );
 
-	fileMap = (char*)mmap( 0 , length , PROT_READ , MAP_PRIVATE , ion , 0 );
+  fileMap = (char*)mmap( 0 , length , PROT_READ , MAP_PRIVATE , ion , 0 );
 
     //if mmap'ing fails, fall back to the read-lseek combination
     if ( fileMap == MAP_FAILED )
     {
-            readWriteBalance = 0; 
+            readWriteBalance = 0;
             fileMap = 0;
             qDebug() << ": mmap'ing history failed.  errno = " << errno;
     }
@@ -121,23 +121,23 @@ void HistoryFile::map()
 
 void HistoryFile::unmap()
 {
-	int result = munmap( fileMap , length );
-	assert( result == 0 );
+  int result = munmap( fileMap , length );
+  assert( result == 0 );
 
-	fileMap = 0;
+  fileMap = 0;
 }
 
 bool HistoryFile::isMapped()
 {
-	return (fileMap != 0);
+  return (fileMap != 0);
 }
 
 void HistoryFile::add(const unsigned char* bytes, int len)
 {
   if ( fileMap )
-		  unmap();
-		
-  readWriteBalance++;
+      unmap();
+
+  ++readWriteBalance;
 
   int rc = 0;
 
@@ -148,27 +148,24 @@ void HistoryFile::add(const unsigned char* bytes, int len)
 
 void HistoryFile::get(unsigned char* bytes, int len, int loc)
 {
-  //count number of get() calls vs. number of add() calls.  
-  //If there are many more get() calls compared with add() 
+  //count number of get() calls vs. number of add() calls.
+  //If there are many more get() calls compared with add()
   //calls (decided by using MAP_THRESHOLD) then mmap the log
   //file to improve performance.
   readWriteBalance--;
   if ( !fileMap && readWriteBalance < MAP_THRESHOLD )
-		  map();
+      map();
 
   if ( fileMap )
-  {
-	for (int i=0;i<len;i++)
-			bytes[i]=fileMap[loc+i];
-  }
+    memcpy(bytes, fileMap + loc, len * sizeof(char));
   else
-  {	
-  	int rc = 0;
+  {
+    int rc = 0;
 
-  	if (loc < 0 || len < 0 || loc + len > length)
-    	fprintf(stderr,"getHist(...,%d,%d): invalid args.\n",len,loc);
-  	rc = lseek(ion,loc,SEEK_SET); if (rc < 0) { perror("HistoryFile::get.seek"); return; }
-  	rc = read(ion,bytes,len);     if (rc < 0) { perror("HistoryFile::get.read"); return; }
+    if (loc < 0 || len < 0 || loc + len > length)
+      fprintf(stderr,"getHist(...,%d,%d): invalid args.\n",len,loc);
+    rc = lseek(ion,loc,SEEK_SET); if (rc < 0) { perror("HistoryFile::get.seek"); return; }
+    rc = read(ion,bytes,len);     if (rc < 0) { perror("HistoryFile::get.read"); return; }
   }
 }
 
@@ -198,7 +195,7 @@ bool HistoryScroll::hasScroll()
 
 // History Scroll File //////////////////////////////////////
 
-/* 
+/*
    The history scroll makes a Row(Row(Cell)) from
    two history buffers. The index buffer contains
    start of line positions which refere to the cells
@@ -218,7 +215,7 @@ HistoryScrollFile::HistoryScrollFile(const QString &logFileName)
 HistoryScrollFile::~HistoryScrollFile()
 {
 }
- 
+
 int HistoryScrollFile::getLines()
 {
   return index.len() / sizeof(int);
@@ -243,12 +240,12 @@ int HistoryScrollFile::startOfLine(int lineno)
 {
   if (lineno <= 0) return 0;
   if (lineno <= getLines())
-    { 
-	
-	if (!index.isMapped())
-			index.map();
-	
-	int res;
+    {
+
+  if (!index.isMapped())
+      index.map();
+
+  int res;
     index.get((unsigned char*)&res,sizeof(int),(lineno-1)*sizeof(int));
     return res;
     }
@@ -268,7 +265,7 @@ void HistoryScrollFile::addCells(const Character text[], int count)
 void HistoryScrollFile::addLine(bool previousWrapped)
 {
   if (index.isMapped())
-		  index.unmap();
+      index.unmap();
 
   int locn = cells.len();
   index.add((unsigned char*)&locn,sizeof(int));
@@ -342,7 +339,7 @@ int HistoryScrollBuffer::getLineLen(int lineNumber)
 bool HistoryScrollBuffer::isWrappedLine(int lineNumber)
 {
   Q_ASSERT( lineNumber >= 0 && lineNumber < _maxLineCount );
-    
+
   if (lineNumber < _usedLines)
   {
     //kDebug() << "Line" << lineNumber << "wrapped is" << _wrappedLine[bufferIndex(lineNumber)];
@@ -358,12 +355,12 @@ void HistoryScrollBuffer::getCells(int lineNumber, int startColumn, int count, C
 
   Q_ASSERT( lineNumber < _maxLineCount );
 
-  if (lineNumber >= _usedLines) 
+  if (lineNumber >= _usedLines)
   {
     memset(buffer, 0, count * sizeof(Character));
     return;
   }
-  
+
   const HistoryLine& line = _historyBuffer[bufferIndex(lineNumber)];
 
   //kDebug() << "startCol " << startColumn;
@@ -371,7 +368,7 @@ void HistoryScrollBuffer::getCells(int lineNumber, int startColumn, int count, C
   //kDebug() << "count " << count;
 
   Q_ASSERT( startColumn <= line.size() - count );
-    
+
   memcpy(buffer, line.constData() + startColumn , count * sizeof(Character));
 }
 
@@ -379,12 +376,12 @@ void HistoryScrollBuffer::setMaxNbLines(unsigned int lineCount)
 {
     HistoryLine* oldBuffer = _historyBuffer;
     HistoryLine* newBuffer = new HistoryLine[lineCount];
-    
+
     for ( int i = 0 ; i < qMin(_usedLines,(int)lineCount) ; i++ )
     {
         newBuffer[i] = oldBuffer[bufferIndex(i)];
     }
-    
+
     _usedLines = qMin(_usedLines,(int)lineCount);
     _maxLineCount = lineCount;
     _head = ( _usedLines == _maxLineCount ) ? 0 : _usedLines-1;
@@ -406,7 +403,7 @@ int HistoryScrollBuffer::bufferIndex(int lineNumber)
         return (_head+lineNumber+1) % _maxLineCount;
     }
     else
-    {   
+    {
         return lineNumber;
     }
 }
@@ -504,7 +501,7 @@ void HistoryScrollBlockArray::getCells(int lineno, int colno,
 void HistoryScrollBlockArray::addCells(const Character a[], int count)
 {
   Block *b = m_blockArray.lastBlock();
-  
+
   if (!b) return;
 
   // put cells in block's data
@@ -662,7 +659,7 @@ const QString& HistoryTypeFile::getFileName() const
 
 HistoryScroll* HistoryTypeFile::scroll(HistoryScroll *old) const
 {
-  if (dynamic_cast<HistoryFile *>(old)) 
+  if (dynamic_cast<HistoryFile *>(old))
      return old; // Unchanged.
 
   HistoryScroll *newScroll = new HistoryScrollFile(m_fileName);
@@ -689,7 +686,7 @@ HistoryScroll* HistoryTypeFile::scroll(HistoryScroll *old) const
   }
 
   delete old;
-  return newScroll; 
+  return newScroll;
 }
 
 int HistoryTypeFile::maximumLineCount() const
