@@ -9,19 +9,18 @@ MOC_DIR 	= ../.moc
 
 CONFIG(debug, debug|release) {
     OBJECTS_DIR = ../.objs_d
-    TARGET 	= consoleq_d
+    TARGET 	= qterm
     LIBS 	+= -L.. ../libqtermwidget_d.a
 } else {
     OBJECTS_DIR = ../.objs
-    TARGET 	= consoleq
+    TARGET 	= qterm
     LIBS 	+= -L.. ../libqtermwidget.a
 }
 
-SOURCES 	= main.cpp 
+SOURCES 	= main.cpp
 
 INCLUDEPATH 	= ../lib
 
 #LIBS 		+= -L.. -lqtermwidget
 
 
-	
