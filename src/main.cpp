@@ -19,6 +19,7 @@
 
 #include <QtGui/QApplication>
 #include <QtGui/QMainWindow>
+#include <QtCore/QDebug>
 
 #include "qtermwidget.h"
 
@@ -27,17 +28,22 @@ int main(int argc, char *argv[])
   QApplication app(argc, argv);
   QMainWindow *mainWindow = new QMainWindow();
 
-  QTermWidget *console = new QTermWidget();
+  QTermWidget *console = new QTermWidget(0);
 
   QFont font = QApplication::font();
   font.setFamily("DejaVu sans mono");
   font.setPointSize(9);
 
   console->setTerminalFont(font);
-  console->setHistorySize(0xffffff);
+  console->setHistorySize(0x00ffffff);
 
-  //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
+  console->setColorScheme(COLOR_SCHEME_WHITE_ON_BLACK);
   console->setScrollBarPosition(QTermWidget::ScrollBarRight);
+
+  // get shell from environment
+  QString Shell(getenv("SHELL"));
+  if (!Shell.isEmpty()) console->setShellProgram(Shell);
+  console->startShellProgram();
 
   mainWindow->setCentralWidget(console);
   mainWindow->resize(802, 610);
