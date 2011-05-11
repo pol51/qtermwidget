@@ -27,8 +27,8 @@
 
 // Qt
 #include <QtCore/QStringList>
-#include <QtCore>
-#include <QWidget>
+#include <QtCore/QSize>
+#include <QtGui/qwindowdefs.h>
 
 // Konsole
 #include "History.h"

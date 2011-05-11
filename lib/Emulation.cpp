@@ -1,7 +1,7 @@
 /*
     This file is part of Konsole, an X terminal.
 
-    Copyright (C) 2007 Robert Knight <robertknight@gmail.com> 
+    Copyright (C) 2007 Robert Knight <robertknight@gmail.com>
     Copyright (C) 1997,1998 by Lars Doelle <lars.doelle@on-line.de>
     Copyright (C) 1996 by Matthias Ettrich <ettrich@kde.org>
 
@@ -33,15 +33,14 @@
 #include <unistd.h>
 
 // Qt
-#include <QtGui/QApplication>
-#include <QtGui/QClipboard>
+#include <QtCore/QTime>
+#include <QtCore/QThread>
 #include <QtCore/QHash>
-#include <QtGui/QKeyEvent>
 #include <QtCore/QRegExp>
 #include <QtCore/QTextStream>
-#include <QtCore/QThread>
-
-#include <QtCore/QTime>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QKeyEvent>
 
 // Konsole
 #include "KeyboardTranslator.h"
@@ -77,9 +76,9 @@ Emulation::Emulation() :
 
   QObject::connect(&_bulkTimer1, SIGNAL(timeout()), this, SLOT(showBulk()) );
   QObject::connect(&_bulkTimer2, SIGNAL(timeout()), this, SLOT(showBulk()) );
-   
+
   // listen for mouse status changes
-  connect( this , SIGNAL(programUsesMouseChanged(bool)) , 
+  connect( this , SIGNAL(programUsesMouseChanged(bool)) ,
            SLOT(usesMouseChanged(bool)) );
 }
 
@@ -131,7 +130,7 @@ void Emulation::setScreen(int n)
 {
   Screen *old = _currentScreen;
   _currentScreen = _screen[n&1];
-  if (_currentScreen != old) 
+  if (_currentScreen != old)
   {
      old->setBusySelecting(false);
 
@@ -231,7 +230,7 @@ void Emulation::receiveChar(int c)
 void Emulation::sendKeyEvent( QKeyEvent* ev )
 {
   emit stateSet(NOTIFYNORMAL);
-  
+
   if (!ev->text().isEmpty())
   { // A block of text
     // Note that the text is proper unicode.
@@ -261,29 +260,29 @@ TODO: Character composition from the old code.  See #96536
 
 void Emulation::receiveData(const char* text, int length)
 {
-	emit stateSet(NOTIFYACTIVITY);
+  emit stateSet(NOTIFYACTIVITY);
 
-	bufferedUpdate();
-    	
+  bufferedUpdate();
+
     QString unicodeText = _decoder->toUnicode(text,length);
 
-	//send characters to terminal emulator
-	for (int i=0;i<unicodeText.length();i++)
-	{
-		receiveChar(unicodeText[i].unicode());
-	}
+  //send characters to terminal emulator
+  for (int i=0;i<unicodeText.length();i++)
+  {
+    receiveChar(unicodeText[i].unicode());
+  }
 
-	//look for z-modem indicator
-	//-- someone who understands more about z-modems that I do may be able to move
-	//this check into the above for loop?
-	for (int i=0;i<length;i++)
-	{
-		if (text[i] == '\030')
-    		{
-      			if ((length-i-1 > 3) && (strncmp(text+i+1, "B00", 3) == 0))
-      				emit zmodemDetected();
-    		}
-	}
+  //look for z-modem indicator
+  //-- someone who understands more about z-modems that I do may be able to move
+  //this check into the above for loop?
+  for (int i=0;i<length;i++)
+  {
+    if (text[i] == '\030')
+        {
+            if ((length-i-1 > 3) && (strncmp(text+i+1, "B00", 3) == 0))
+              emit zmodemDetected();
+        }
+  }
 }
 
 //OLDER VERSION
@@ -294,13 +293,13 @@ void Emulation::receiveData(const char* text, int length)
 //
 //There is something about stopping the _decoder if "we get a control code halfway a multi-byte sequence" (see below)
 //which hasn't been ported into the newer function (above).  Hopefully someone who understands this better
-//can find an alternative way of handling the check.  
+//can find an alternative way of handling the check.
 
 
 /*void Emulation::onRcvBlock(const char *s, int len)
 {
   emit notifySessionState(NOTIFYACTIVITY);
-  
+
   bufferedUpdate();
   for (int i = 0; i < len; i++)
   {
@@ -330,7 +329,7 @@ void Emulation::receiveData(const char* text, int length)
     if (s[i] == '\030')
     {
       if ((len-i-1 > 3) && (strncmp(s+i+1, "B00", 3) == 0))
-      	emit zmodemDetected();
+        emit zmodemDetected();
     }
   }
 }*/
@@ -353,11 +352,11 @@ void Emulation::onSelectionExtend(const int x, const int y) {
 void Emulation::setSelection(const bool preserve_line_breaks) {
   if (!connected) return;
   QString t = _currentScreen->selectedText(preserve_line_breaks);
-  if (!t.isNull()) 
+  if (!t.isNull())
   {
     QListIterator< TerminalDisplay* > viewIter(_views);
 
-    while (viewIter.hasNext())    
+    while (viewIter.hasNext())
         viewIter.next()->setSelection(t);
   }
 }
@@ -374,11 +373,11 @@ void Emulation::clearSelection() {
   showBulk();
 }
 
-#endif 
+#endif
 
-void Emulation::writeToStream( TerminalCharacterDecoder* _decoder , 
+void Emulation::writeToStream( TerminalCharacterDecoder* _decoder ,
                                int startLine ,
-                               int endLine) 
+                               int endLine)
 {
   _currentScreen->writeToStream(_decoder,startLine,endLine);
 }
@@ -455,17 +454,17 @@ bool ExtendedCharTable::extendedCharMatch(ushort hash , ushort* unicodePoints , 
 {
     ushort* entry = extendedCharTable[hash];
 
-    // compare given length with stored sequence length ( given as the first ushort in the 
-    // stored buffer ) 
-    if ( entry == 0 || entry[0] != length ) 
+    // compare given length with stored sequence length ( given as the first ushort in the
+    // stored buffer )
+    if ( entry == 0 || entry[0] != length )
        return false;
     // if the lengths match, each character must be checked.  the stored buffer starts at
     // entry[1]
     for ( int i = 0 ; i < length ; i++ )
     {
         if ( entry[i+1] != unicodePoints[i] )
-           return false; 
-    } 
+           return false;
+    }
     return true;
 }
 ushort ExtendedCharTable::createExtendedChar(ushort* unicodePoints , ushort length)
@@ -478,7 +477,7 @@ ushort ExtendedCharTable::createExtendedChar(ushort* unicodePoints , ushort leng
     {
         if ( extendedCharMatch(hash,unicodePoints,length) )
         {
-            // this sequence already has an entry in the table, 
+            // this sequence already has an entry in the table,
             // return its hash
             return hash;
         }
@@ -488,16 +487,16 @@ ushort ExtendedCharTable::createExtendedChar(ushort* unicodePoints , ushort leng
             // points then try next hash
             hash++;
         }
-    }    
+    }
 
-    
+
      // add the new sequence to the table and
      // return that index
     ushort* buffer = new ushort[length+1];
     buffer[0] = length;
     for ( int i = 0 ; i < length ; i++ )
-       buffer[i+1] = unicodePoints[i]; 
-    
+       buffer[i+1] = unicodePoints[i];
+
     extendedCharTable.insert(hash,buffer);
 
     return hash;

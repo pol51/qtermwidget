@@ -23,7 +23,8 @@
 #ifndef kpty_h
 #define kpty_h
 
-#include <QtCore>
+#include <QtCore/QStringList>
+#include <QtCore/QDebug>
 
 struct KPtyPrivate;
 struct termios;

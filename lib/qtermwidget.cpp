@@ -18,10 +18,13 @@
 
 #include "qtermwidget.h"
 
+// Qt
+#include <QtGui/QApplication>
+#include <QtCore/QTextCodec>
+
+// Konsole
 #include "Session.h"
 #include "TerminalDisplay.h"
-
-#include <QtGui/QApplication>
 
 using namespace Konsole;
 

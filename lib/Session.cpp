@@ -35,8 +35,6 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QRegExp>
-#include <QtCore/QStringList>
-#include <QtCore>
 
 #include "Pty.h"
 #include "TerminalDisplay.h"
@@ -59,8 +57,8 @@ Session::Session() :
    , _addToUtmp(false)  // disabled by default because of a bug encountered on certain systems
                         // which caused Konsole to hang when closing a tab and then opening a new
                         // one.  A 'QProcess destroyed while still running' warning was being
-                        // printed to the terminal.  Likely a problem in KPty::logout() 
-                        // or KPty::login() which uses a QProcess to start /usr/bin/utempter 
+                        // printed to the terminal.  Likely a problem in KPty::logout()
+                        // or KPty::login() which uses a QProcess to start /usr/bin/utempter
    , _flowControl(true)
    , _fullScripting(false)
    , _sessionId(0)
@@ -211,8 +209,8 @@ void Session::addView(TerminalDisplay* widget)
     QObject::connect( widget ,SIGNAL(destroyed(QObject*)) , this ,
                     SLOT(viewDestroyed(QObject*)) );
 //slot for close
-    QObject::connect(this, SIGNAL(finished()), widget, SLOT(close()));		    
-    
+    QObject::connect(this, SIGNAL(finished()), widget, SLOT(close()));
+
 }
 
 void Session::viewDestroyed(QObject* view)
@@ -228,7 +226,7 @@ void Session::removeView(TerminalDisplay* widget)
 {
     _views.removeAll(widget);
 
-	disconnect(widget,0,this,0);
+  disconnect(widget,0,this,0);
 
     if ( _emulation != 0 )
     {
@@ -244,11 +242,11 @@ void Session::removeView(TerminalDisplay* widget)
         disconnect( _emulation , 0 , widget , 0);
     }
 
-	// close the session automatically when the last view is removed
-	if ( _views.count() == 0 )
-	{
-		close();
-	}
+  // close the session automatically when the last view is removed
+  if ( _views.count() == 0 )
+  {
+    close();
+  }
 }
 
 void Session::run()
@@ -263,12 +261,12 @@ void Session::run()
   // Check to see if the given program is executable.
   QString exec = QFile::encodeName(_program);
 
-  // if 'exec' is not specified, fall back to default shell.  if that 
+  // if 'exec' is not specified, fall back to default shell.  if that
   // is not set then fall back to /bin/sh
   if ( exec.isEmpty() )
       exec = getenv("SHELL");
   if ( exec.isEmpty() )
-  	  exec = "/bin/sh";
+      exec = "/bin/sh";
 
   // if no arguments are specified, fall back to shell
   QStringList arguments =  _arguments.join(QChar(' ')).isEmpty() ?
@@ -315,26 +313,26 @@ void Session::run()
 void Session::setUserTitle( int what, const QString &caption )
 {
     //set to true if anything is actually changed (eg. old _nameTitle != new _nameTitle )
-	bool modified = false;
+  bool modified = false;
 
     // (btw: what=0 changes _userTitle and icon, what=1 only icon, what=2 only _nameTitle
-    if ((what == 0) || (what == 2)) 
+    if ((what == 0) || (what == 2))
     {
-       	if ( _userTitle != caption ) {
-			_userTitle = caption;
-			modified = true;
-		}
+        if ( _userTitle != caption ) {
+      _userTitle = caption;
+      modified = true;
+    }
     }
 
     if ((what == 0) || (what == 1))
-	{
-		if ( _iconText != caption ) {
-       		_iconText = caption;
-			modified = true;
-		}
-	}
+  {
+    if ( _iconText != caption ) {
+          _iconText = caption;
+      modified = true;
+    }
+  }
 
-    if (what == 11) 
+    if (what == 11)
     {
       QString colorString = caption.section(';',0,0);
       qDebug() << __FILE__ << __LINE__ << ": setting background colour to " << colorString;
@@ -354,39 +352,39 @@ void Session::setUserTitle( int what, const QString &caption )
       }
     }
 
-	if (what == 30) 
+  if (what == 30)
     {
-		if ( _nameTitle != caption ) {
-       		setTitle(Session::NameRole,caption);
-			return;
-		}
-	}
+    if ( _nameTitle != caption ) {
+          setTitle(Session::NameRole,caption);
+      return;
+    }
+  }
 
-    if (what == 31) 
+    if (what == 31)
     {
        QString cwd=caption;
        cwd=cwd.replace( QRegExp("^~"), QDir::homePath() );
        emit openUrlRequest(cwd);
-	}
+  }
 
     // change icon via \033]32;Icon\007
-    if (what == 32) 
-    { 
-    	if ( _iconName != caption ) {
-	   		_iconName = caption;
+    if (what == 32)
+    {
+      if ( _iconName != caption ) {
+        _iconName = caption;
 
-			modified = true;
-		}
+      modified = true;
+    }
     }
 
-    if (what == 50) 
+    if (what == 50)
     {
         emit profileChangeCommandReceived(caption);
         return;
     }
 
-	if ( modified )
-    	emit titleChanged();
+  if ( modified )
+      emit titleChanged();
 }
 
 QString Session::userTitle() const
@@ -417,9 +415,9 @@ void Session::monitorTimerDone()
   //
   //This breaks with the addition of multiple views of a session.  The popup should disappear
   //when any of the views of the session becomes active
-  
 
-  //FIXME: Make message text for this notification and the activity notification more descriptive.	
+
+  //FIXME: Make message text for this notification and the activity notification more descriptive.
   if (_monitorSilence) {
 //    KNotification::event("Silence", ("Silence in session '%1'", _nameTitle), QPixmap(),
 //                    QApplication::activeWindow(),
@@ -439,7 +437,7 @@ void Session::activityStateSet(int state)
   if (state==NOTIFYBELL)
   {
       QString s; s.sprintf("Bell in session '%s'",_nameTitle.toAscii().data());
-      
+
       emit bellRequest( s );
   }
   else if (state==NOTIFYACTIVITY)
@@ -583,11 +581,11 @@ void Session::done(int exitStatus)
     else if (_shellProcess->signalled())
     {
       if (_shellProcess->coreDumped())
-      {    
+      {
 
         message.sprintf("Session '%s' exited with signal %d and dumped core.", _nameTitle.toAscii().data(), _shellProcess->exitSignal());
       }
-      else { 
+      else {
         message.sprintf("Session '%s' exited with signal %d.", _nameTitle.toAscii().data(), _shellProcess->exitSignal());
       }
     }
@@ -750,18 +748,18 @@ void Session::setAddToUtmp(bool set)
 void Session::setFlowControlEnabled(bool enabled)
 {
   if (_flowControl == enabled)
-  	return;
+    return;
 
   _flowControl = enabled;
 
-  if (_shellProcess)  
-	_shellProcess->setXonXoff(_flowControl);
-  
+  if (_shellProcess)
+  _shellProcess->setXonXoff(_flowControl);
+
   emit flowControlEnabledChanged(enabled);
 }
 bool Session::flowControlEnabled() const
 {
-	return _flowControl;
+  return _flowControl;
 }
 //void Session::fireZModemDetected()
 //{

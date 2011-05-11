@@ -30,13 +30,7 @@
 #include <errno.h>
 #include <termios.h>
 
-// Qt
-#include <QtCore>
-
-// KDE
-//#include <KStandardDirs>
-//#include <KLocale>
-//#include <KDebug>
+// Konsole
 #include "kpty.h"
 
 using namespace Konsole;
@@ -98,7 +92,7 @@ void Pty::setUtf8Mode(bool enable)
 void Pty::setErase(char erase)
 {
   _eraseChar = erase;
-  
+
   if (pty()->masterFd() >= 0)
   {
     struct ::termios ttmode;
@@ -109,20 +103,20 @@ void Pty::setErase(char erase)
 
     if (!pty()->tcSetAttr(&ttmode))
       qWarning("Unable to set terminal attributes.");
-  }  
+  }
 }
 
 char Pty::erase() const
 {
-	if (pty()->masterFd() >= 0)
-	{
-		qDebug() << "Getting erase char";
-		struct ::termios ttyAttributes;
-		pty()->tcGetAttr(&ttyAttributes);
-		return ttyAttributes.c_cc[VERASE];
-	}
+  if (pty()->masterFd() >= 0)
+  {
+    qDebug() << "Getting erase char";
+    struct ::termios ttyAttributes;
+    pty()->tcGetAttr(&ttyAttributes);
+    return ttyAttributes.c_cc[VERASE];
+  }
 
-	return _eraseChar;
+  return _eraseChar;
 }
 
 void Pty::addEnvironmentVariables(const QStringList& environment)
@@ -134,7 +128,7 @@ void Pty::addEnvironmentVariables(const QStringList& environment)
 
         // split on the first '=' character
         int pos = pair.indexOf('=');
-        
+
         if ( pos >= 0 )
         {
             QString variable = pair.left(pos);
@@ -148,14 +142,14 @@ void Pty::addEnvironmentVariables(const QStringList& environment)
     }
 }
 
-int Pty::start(const QString& program, 
-               const QStringList& programArguments, 
-               const QStringList& environment, 
-               ulong winid, 
+int Pty::start(const QString& program,
+               const QStringList& programArguments,
+               const QStringList& environment,
+               ulong winid,
                bool addToUtmp
-//               const QString& dbusService, 
+//               const QString& dbusService,
 //               const QString& dbusSession)
-		)
+    )
 {
   clearArguments();
 
@@ -191,7 +185,7 @@ int Pty::start(const QString& program,
   setUsePty(All, addToUtmp);
 
   pty()->open();
-  
+
   struct ::termios ttmode;
   pty()->tcGetAttr(&ttmode);
   if (!_xonXoff)
@@ -206,11 +200,11 @@ int Pty::start(const QString& program,
 #endif
 
   if (_eraseChar != 0)
-  	ttmode.c_cc[VERASE] = _eraseChar;
-  
+    ttmode.c_cc[VERASE] = _eraseChar;
+
   if (!pty()->tcSetAttr(&ttmode))
     qWarning("Unable to set terminal attributes.");
-  
+
   pty()->setWinSize(_windowLines, _windowColumns);
 
   if ( K3Process::start(NotifyOnExit, (Communication) (Stdin | Stdout)) == false )
@@ -240,7 +234,7 @@ Pty::Pty()
       _utf8(true)
 {
   connect(this, SIGNAL(receivedStdout(K3Process *, char *, int )),
-	  this, SLOT(dataReceived(K3Process *,char *, int)));
+    this, SLOT(dataReceived(K3Process *,char *, int)));
   connect(this, SIGNAL(processExited(K3Process *)),
           this, SLOT(donePty()));
   connect(this, SIGNAL(wroteStdin(K3Process *)),
@@ -265,13 +259,13 @@ void Pty::writeReady()
 void Pty::doSendJobs() {
   if(_pendingSendJobs.isEmpty())
   {
-     emit bufferEmpty(); 
+     emit bufferEmpty();
      return;
   }
-  
+
   SendJob& job = _pendingSendJobs.first();
 
-  
+
   if (!writeStdin( job.data(), job.length() ))
   {
     qWarning("Pty::doSendJobs - Could not send input data to terminal process.");
@@ -312,7 +306,7 @@ int Pty::foregroundProcessGroup() const
     if ( pid != -1 )
     {
         return pid;
-    } 
+    }
 
     return 0;
 }

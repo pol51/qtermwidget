@@ -24,7 +24,8 @@
 // Own
 #include "BlockArray.h"
 
-#include <QtCore>
+// Qt
+#include <QtCore/QDebug>
 
 // System
 #include <assert.h>

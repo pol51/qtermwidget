@@ -127,11 +127,6 @@ extern "C" {
 # endif
 #endif
 
-//#include <kdebug.h>
-//#include <kstandarddirs.h>	// findExe
-
-#include <QtCore>
-
 // not defined on HP-UX for example
 #ifndef CTRL
 # define CTRL(x) ((x) & 037)
@@ -233,7 +228,7 @@ bool KPty::open()
 
   if (d->masterFd >= 0)
   {
- 
+
 #ifdef HAVE_PTSNAME
     char *ptsn = ptsname(d->masterFd);
     if (ptsn) {
@@ -320,7 +315,7 @@ bool KPty::open()
 
 #if defined (HAVE__GETPTY) || defined (HAVE_GRANTPT)
  grantedpt:
-#endif 
+#endif
 
 #ifdef HAVE_REVOKE
   revoke(d->ttyName.data());

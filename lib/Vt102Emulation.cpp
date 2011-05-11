@@ -240,7 +240,6 @@ void Vt102Emulation::pushToToken(int cc)
 
 void Vt102Emulation::initTokenizer()
 {
-  int i;
   quint8* s;
 
   memset(tbl,       CTL,  32  * sizeof(int));
@@ -1245,7 +1244,9 @@ static void hexdump(int* s, int len)
 void Vt102Emulation::scan_buffer_report()
 {
   if (ppos == 0 || ppos == 1 && (pbuf[0] & 0xff) >= 32) return;
-  printf("token: "); hexdump(pbuf,ppos); printf("\n");
+  printf("token: ");
+  hexdump(pbuf,ppos);
+  printf("\n");
 }
 
 /*!

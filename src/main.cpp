@@ -17,9 +17,8 @@
 */
 
 
-#include <QtCore>
-#include <QtGui>
-#include <QApplication>
+#include <QtGui/QApplication>
+#include <QtGui/QMainWindow>
 
 #include "qtermwidget.h"
 
