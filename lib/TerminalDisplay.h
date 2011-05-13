@@ -211,11 +211,11 @@ public:
      *
      * Defaults to BlockCursor
      */
-    void setKeyboardCursorShape(KeyboardCursorShape shape);
+    void setKeyboardCursorShape(KeyboardCursorShape shape) { _cursorShape = shape; }
     /**
      * Returns the shape of the keyboard cursor.  See setKeyboardCursorShape()
      */
-    KeyboardCursorShape keyboardCursorShape() const;
+    KeyboardCursorShape keyboardCursorShape() const { return _cursorShape; }
 
     /**
      * Sets the color used to draw the keyboard cursor.
@@ -237,7 +237,7 @@ public:
      * cursor color is set to change according to the foreground color of the character
      * underneath it.
      */
-    QColor keyboardCursorColor() const;
+    const QColor &keyboardCursorColor() const { return _cursorColor; }
 
     /**
      * Returns the number of lines of text which can be displayed in the widget.
